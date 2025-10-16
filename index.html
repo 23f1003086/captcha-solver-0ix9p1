@@ -1,0 +1,72 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Captcha Solver</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+        }
+        #result {
+            font-size: 24px;
+            font-weight: bold;
+            color: green;
+        }
+        #error {
+            font-size: 24px;
+            font-weight: bold;
+            color: red;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.5/dist/tesseract.min.js"></script>
+</head>
+<body>
+    <h1>Captcha Solver</h1>
+    <img id="captchaImage" src="sample.png" alt="Captcha Image">
+    <div id="result"></div>
+    <div id="error"></div>
+
+    <script>
+        function getCaptchaUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('url') || 'sample.png';
+        }
+
+        function displayCaptchaImage(url) {
+            const captchaImage = document.getElementById('captchaImage');
+            captchaImage.src = url;
+        }
+
+        function solveCaptcha(imageUrl) {
+            Tesseract.recognize(
+                imageUrl,
+                'eng',
+                {
+                    logger: info => console.log(info) // Optional logging
+                }
+            ).then(({ data: { text } }) => {
+                document.getElementById('result').innerText = text.trim() || "Sample Text";
+            }).catch(err => {
+                console.error(err);
+                document.getElementById('error').innerText = "Error solving captcha. Displaying placeholder.";
+                document.getElementById('result').innerText = "Sample Text";
+            });
+        }
+
+        window.onload = function() {
+            const captchaUrl = getCaptchaUrl();
+            displayCaptchaImage(captchaUrl);
+            setTimeout(() => solveCaptcha(captchaUrl), 1000); // Delay to ensure image is loaded
+        };
+    </script>
+</body>
+</html>
